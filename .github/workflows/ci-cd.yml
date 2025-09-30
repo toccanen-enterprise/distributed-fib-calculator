@@ -74,13 +74,21 @@ jobs:
       - name: Build & Push Client Image
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
-          docker compose build client
-          docker tag client:latest $IMAGE:latest
-          docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
+          LOCAL_TAG=${{ env.DOCKER_PROJECT_NAME }}_client:latest 
+          SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
+          
+          docker compose -p ${{ env.DOCKER_PROJECT_NAME }} build --quiet client # Use -p to set project name
+          
+          docker tag $LOCAL_TAG $IMAGE:latest
+          docker tag $LOCAL_TAG $IMAGE:$SHA_TAG
+          
           docker push $IMAGE:latest
-          docker push $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
+          docker push $IMAGE:$SHA_TAG
         
-      # --- B. Build and Push: SERVER ---
+        env:
+          DOCKER_PROJECT_NAME: distributed-fib-calculator
+
+          # --- B. Build and Push: SERVER ---
       - name: Build & Push SERVER Image
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
