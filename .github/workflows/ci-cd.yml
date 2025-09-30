@@ -62,8 +62,6 @@ jobs:
           echo "nginx_changed=${{ steps.changes.outputs.nginx_changed }}" >> $GITHUB_OUTPUT
   client-tests:
     runs-on: ubuntu-latest
-    if: |
-      needs.detect-changes.outputs.client_changed == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -75,7 +73,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./client
 
       - name: Run Client Unit Tests
