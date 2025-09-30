@@ -24,10 +24,10 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      client_changed: ${{ steps.changes.outputs.client }}
-      server_changed: ${{ steps.changes.outputs.server }}
-      worker_changed: ${{ steps.changes.outputs.worker }}
-      nginx_changed: ${{ steps.changes.outputs.nginx }}
+      client_changed: ${{ steps.changes.outputs.client_changed }}
+      server_changed: ${{ steps.changes.outputs.server_changed }}
+      worker_changed: ${{ steps.changes.outputs.worker_changed }}
+      nginx_changed: ${{ steps.changes.outputs.nginx_changed }}
     
     steps:
       - uses: actions/checkout@v4
@@ -43,26 +43,26 @@ jobs:
             README.md
             LICENSE
             .gitignore
-          json: |
-            {
-              "client": ["client/**"],
-              "worker": ["worker/**"],
-              "server": ["server/**"],
-              "nginx": ["nginx/**"]
-            }
+          files: |
+            client:
+              - 'client/**'
+            worker:
+              - 'worker/**'
+            server:
+              - 'server/**'
+            nginx:
+              - 'nginx/**'
             
       - name: Set output variables
         id: set_outputs
         run: |
-          echo "client_changed=${{ steps.changes.outputs.client }}" >> $GITHUB_OUTPUT
-          echo "server_changed=${{ steps.changes.outputs.server }}" >> $GITHUB_OUTPUT
-          echo "worker_changed=${{ steps.changes.outputs.worker }}" >> $GITHUB_OUTPUT
-          echo "nginx_changed=${{ steps.changes.outputs.nginx }}" >> $GITHUB_OUTPUT
-
+          echo "client_changed=${{ steps.changes.outputs.client_changed }}" >> $GITHUB_OUTPUT
+          echo "server_changed=${{ steps.changes.outputs.server_changed }}" >> $GITHUB_OUTPUT
+          echo "worker_changed=${{ steps.changes.outputs.worker_changed }}" >> $GITHUB_OUTPUT
+          echo "nginx_changed=${{ steps.changes.outputs.nginx_changed }}" >> $GITHUB_OUTPUT
+  
   client-tests:
     runs-on: ubuntu-latest
-    if: |
-      needs.detect-changes.outputs.client_changed == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -72,9 +72,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./client
 
       - name: Run Client Unit Tests
@@ -158,7 +159,7 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        if: steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
+        if: steps.flags.outputs.NGINX_CHANGED == 'true' || steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
