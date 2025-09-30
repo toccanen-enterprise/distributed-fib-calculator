@@ -73,8 +73,8 @@ jobs:
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/client
           docker compose build client
-          docker tag client:latest $IMAGE:latest
-          docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
+          # docker tag client:latest $IMAGE:latest
+          # docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
           docker push $IMAGE:latest
           docker push $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
         
