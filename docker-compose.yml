@@ -1,0 +1,72 @@
+services:
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${PGUSER}
+      - POSTGRES_PASSWORD=${PGPASSWORD}
+      - POSTGRES_DB=${PGDATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+
+  nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - api
+      - client
+
+  client:
+    build:
+      context: client
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: server
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGDATABASE=${PGDATABASE}
+    depends_on:
+      - worker
+      - postgres
+
+  worker:
+    build:
+      context: worker
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGDATABASE=${PGDATABASE}
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
