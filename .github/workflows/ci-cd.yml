@@ -123,7 +123,7 @@ jobs:
         if: steps.flags.outputs.CLIENT_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
-          docker compose build --no-push client
+          docker compose build client
           docker tag client:latest $IMAGE:latest
           docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
           docker push $IMAGE:latest
@@ -136,7 +136,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
-          docker compose build --no-push server
+          docker compose build server
           
           docker tag server:latest $IMAGE:latest
           docker tag server:latest $IMAGE:$SHA_TAG
@@ -150,7 +150,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
-          docker compose build --no-push worker
+          docker compose build worker
           
           docker tag worker:latest $IMAGE:latest
           docker tag worker:latest $IMAGE:$SHA_TAG
@@ -164,7 +164,7 @@ jobs:
           NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
-          docker compose build --no-push nginx
+          docker compose build nginx
           docker tag nginx:latest $NGINX_IMAGE:latest
           docker tag nginx:latest $NGINX_IMAGE:$SHA_TAG
           docker push $NGINX_IMAGE:latest

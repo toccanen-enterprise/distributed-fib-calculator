@@ -51,6 +51,7 @@ app.get('/values/all', async (req, res) => {
 });
 
 app.get('/values/current', async (req, res) => {
+  // server changed
   redisClient.hgetall('values', (err, values) => {
     res.send(values);
   });
