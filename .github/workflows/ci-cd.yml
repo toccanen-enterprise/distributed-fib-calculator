@@ -29,7 +29,6 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: 'client/package-lock.json'
 
@@ -72,7 +71,7 @@ jobs:
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
         run: |
-          IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
+          IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/client
           docker compose build client
           docker tag client:latest $IMAGE:latest
           docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
@@ -82,7 +81,7 @@ jobs:
       # --- B. Build and Push: SERVER ---
       - name: Build & Push SERVER Image
         run: |
-          IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
+          IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
           docker compose build server
@@ -95,7 +94,7 @@ jobs:
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
         run: |
-          IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/worker
+          IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
           docker compose build worker
@@ -108,7 +107,7 @@ jobs:
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
         run: |
-          NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
+          NGINX_IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
 
           docker compose build nginx
