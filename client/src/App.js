@@ -25,7 +25,8 @@ function App() {
         </header>
         <div>
           <Route exact path="/" component={Fib} />
-          <Route path="/otherpage" component={OtherPage} />
+          <Route exact path="/otherpage" component={OtherPage} />
+          <Route path="*" component={Fib} />
         </div>
       </div>
     </Router>
