@@ -45,7 +45,7 @@ jobs:
   build-and-push-all:
     name: Build & Push All Services
     
-    needs: [client-tests, detect-changes]
+    needs: [client-tests]
     
     runs-on: ubuntu-latest
     permissions:
@@ -70,17 +70,8 @@ jobs:
         id: image_tags
         run: echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
       
-      - name: Set Change Flags
-        id: flags
-        run: |
-          echo "CLIENT_CHANGED=${{ needs.detect-changes.outputs.client_changed }}" >> $GITHUB_OUTPUT
-          echo "SERVER_CHANGED=${{ needs.detect-changes.outputs.server_changed }}" >> $GITHUB_OUTPUT
-          echo "WORKER_CHANGED=${{ needs.detect-changes.outputs.worker_changed }}" >> $GITHUB_OUTPUT
-          echo "NGINX_CHANGED=${{ needs.detect-changes.outputs.nginx_changed }}" >> $GITHUB_OUTPUT
-
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
-        if: steps.flags.outputs.CLIENT_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
           docker compose build client
@@ -91,7 +82,6 @@ jobs:
         
       # --- B. Build and Push: SERVER ---
       - name: Build & Push SERVER Image
-        if: steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -105,7 +95,6 @@ jobs:
 
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
-        if: steps.flags.outputs.WORKER_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -119,7 +108,6 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        if: steps.flags.outputs.NGINX_CHANGED == 'true' || steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
