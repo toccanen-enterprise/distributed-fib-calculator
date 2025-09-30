@@ -82,7 +82,7 @@ jobs:
 
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
-        if: steps.check_client.outputs.build_client == 'true'
+        # if: steps.check_client.outputs.build_client == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/client
           docker compose build client
@@ -103,7 +103,7 @@ jobs:
 
       # --- B. Build and Push: SERVER ---
       - name: Build & Push Server Image
-        if: steps.check_server.outputs.build_server == 'true'
+        # if: steps.check_server.outputs.build_server == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -125,7 +125,7 @@ jobs:
 
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
-        if: steps.check_worker.outputs.build_worker == 'true'
+        # if: steps.check_worker.outputs.build_worker == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -147,7 +147,7 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        if: steps.check_nginx.outputs.build_nginx == 'true'
+        # if: steps.check_nginx.outputs.build_nginx == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
