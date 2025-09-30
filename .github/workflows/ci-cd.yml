@@ -17,8 +17,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_ORG: ${{ github.repository_owner }}
-  NODE_VERSION: '20.x' 
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   client-tests:
@@ -74,21 +73,13 @@ jobs:
       - name: Build & Push Client Image
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
-          LOCAL_TAG=${{ env.DOCKER_PROJECT_NAME }}_client:latest 
-          SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-          
-          docker compose -p ${{ env.DOCKER_PROJECT_NAME }} build --quiet client # Use -p to set project name
-          
-          docker tag $LOCAL_TAG $IMAGE:latest
-          docker tag $LOCAL_TAG $IMAGE:$SHA_TAG
-          
+          docker compose build client
+          docker tag client:latest $IMAGE:latest
+          docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
           docker push $IMAGE:latest
-          docker push $IMAGE:$SHA_TAG
+          docker push $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
         
-        env:
-          DOCKER_PROJECT_NAME: distributed-fib-calculator
-
-          # --- B. Build and Push: SERVER ---
+      # --- B. Build and Push: SERVER ---
       - name: Build & Push SERVER Image
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
