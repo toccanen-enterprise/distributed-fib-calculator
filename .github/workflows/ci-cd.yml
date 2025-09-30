@@ -43,13 +43,15 @@ jobs:
             README.md
             LICENSE
             .gitignore
-          json: |
-            {
-              "client": ["client/**"],
-              "worker": ["worker/**"],
-              "server": ["server/**"],
-              "nginx": ["nginx/**"]
-            }
+          files: |
+            client:
+              - 'client/**'
+            worker:
+              - 'worker/**'
+            server:
+              - 'server/**'
+            nginx:
+              - 'nginx/**'
             
       - name: Set output variables
         id: set_outputs
@@ -158,7 +160,7 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        if: steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
+        if: steps.flags.outputs.NGINX_CHANGED == 'true' || steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
