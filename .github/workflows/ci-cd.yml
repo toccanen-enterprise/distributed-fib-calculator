@@ -82,10 +82,11 @@ jobs:
 
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
-        # if: steps.check_client.outputs.build_client == 'true'
+        if: steps.check_client.outputs.build_client == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/client
-          docker compose build client
+          docker compose build --progress=plain client
+          docker buildx build --load -t client:latest ./client
           docker tag client:latest $IMAGE:latest
           docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
           docker push $IMAGE:latest
@@ -103,11 +104,12 @@ jobs:
 
       # --- B. Build and Push: SERVER ---
       - name: Build & Push Server Image
-        # if: steps.check_server.outputs.build_server == 'true'
+        if: steps.check_server.outputs.build_server == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-          docker compose build server
+          docker compose build --progress=plain server
+          docker buildx build --load -t server:latest ./server
           docker tag server:latest $IMAGE:latest
           docker tag server:latest $IMAGE:$SHA_TAG
           docker push $IMAGE:latest
@@ -125,11 +127,12 @@ jobs:
 
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
-        # if: steps.check_worker.outputs.build_worker == 'true'
+        if: steps.check_worker.outputs.build_worker == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-          docker compose build worker
+          docker compose build --progress=plain worker
+          docker buildx build --load -t worker:latest ./worker
           docker tag worker:latest $IMAGE:latest
           docker tag worker:latest $IMAGE:$SHA_TAG
           docker push $IMAGE:latest
@@ -147,11 +150,12 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        # if: steps.check_nginx.outputs.build_nginx == 'true'
+        if: steps.check_nginx.outputs.build_nginx == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-          docker compose build nginx
+          docker compose build --progress=plain nginx
+          docker buildx build --load -t nginx:latest ./nginx
           docker tag nginx:latest $NGINX_IMAGE:latest
           docker tag nginx:latest $NGINX_IMAGE:$SHA_TAG
           docker push $NGINX_IMAGE:latest
