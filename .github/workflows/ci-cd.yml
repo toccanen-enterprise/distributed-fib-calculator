@@ -120,7 +120,7 @@ jobs:
 
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
-        if: steps.flags.outputs.CLIENT_CHANGED == 'true'
+        # if: steps.flags.outputs.CLIENT_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/client
           docker compose build client
@@ -131,7 +131,7 @@ jobs:
         
       # --- B. Build and Push: SERVER ---
       - name: Build & Push SERVER Image
-        if: steps.flags.outputs.SERVER_CHANGED == 'true'
+        # if: steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -145,7 +145,7 @@ jobs:
 
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
-        if: steps.flags.outputs.WORKER_CHANGED == 'true'
+        # if: steps.flags.outputs.WORKER_CHANGED == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
@@ -159,7 +159,7 @@ jobs:
 
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
-        if: steps.flags.outputs.NGINX_CHANGED == 'true' || steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
+        # if: steps.flags.outputs.NGINX_CHANGED == 'true' || steps.flags.outputs.CLIENT_CHANGED == 'true' || steps.flags.outputs.SERVER_CHANGED == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
