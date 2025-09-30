@@ -53,8 +53,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetches current and previous commit for git diff
 
-      - name: Set up Docker Buildx and Login
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
       - name: Log in to GitHub Container Registry
@@ -67,49 +69,88 @@ jobs:
       - name: Set Image Tags (SHA)
         id: image_tags
         run: echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
-      
+
+      # --- A. Check for Client Changes ---
+      - name: Check if Client changed
+        id: check_client
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E 'client/Dockerfile|client/src/|client/package.json'; then
+            echo "build_client=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_client=false" >> $GITHUB_OUTPUT
+          fi
+
       # --- A. Build and Push: CLIENT ---
       - name: Build & Push Client Image
+        if: steps.check_client.outputs.build_client == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/client
           docker compose build client
-          # docker tag client:latest $IMAGE:latest
-          # docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
+          docker tag client:latest $IMAGE:latest
+          docker tag client:latest $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
           docker push $IMAGE:latest
           docker push $IMAGE:${{ steps.image_tags.outputs.SHA_TAG }}
-        
+
+      # --- B. Check for Server Changes ---
+      - name: Check if Server changed
+        id: check_server
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E 'server/Dockerfile|server/src/|server/requirements.txt'; then
+            echo "build_server=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_server=false" >> $GITHUB_OUTPUT
+          fi
+
       # --- B. Build and Push: SERVER ---
-      - name: Build & Push SERVER Image
+      - name: Build & Push Server Image
+        if: steps.check_server.outputs.build_server == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/server
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-
           docker compose build server
-          
           docker tag server:latest $IMAGE:latest
           docker tag server:latest $IMAGE:$SHA_TAG
           docker push $IMAGE:latest
           docker push $IMAGE:$SHA_TAG
 
+      # --- C. Check for Worker Changes ---
+      - name: Check if Worker changed
+        id: check_worker
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E 'worker/Dockerfile|worker/src/|worker/requirements.txt'; then
+            echo "build_worker=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_worker=false" >> $GITHUB_OUTPUT
+          fi
+
       # --- C. Build and Push: WORKER ---
       - name: Build & Push Worker Image
+        if: steps.check_worker.outputs.build_worker == 'true'
         run: |
           IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/worker
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-
           docker compose build worker
-          
           docker tag worker:latest $IMAGE:latest
           docker tag worker:latest $IMAGE:$SHA_TAG
           docker push $IMAGE:latest
           docker push $IMAGE:$SHA_TAG
 
+      # --- D. Check for Nginx Changes ---
+      - name: Check if Nginx changed
+        id: check_nginx
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E 'nginx/Dockerfile|nginx/nginx.conf'; then
+            echo "build_nginx=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_nginx=false" >> $GITHUB_OUTPUT
+          fi
+
       # --- D. Build and Push: NGINX ---
       - name: Build & Push Nginx Image
+        if: steps.check_nginx.outputs.build_nginx == 'true'
         run: |
           NGINX_IMAGE=${{ env.REGISTRY }}${{ env.IMAGE_ORG }}/nginx
           SHA_TAG=${{ steps.image_tags.outputs.SHA_TAG }}
-
           docker compose build nginx
           docker tag nginx:latest $NGINX_IMAGE:latest
           docker tag nginx:latest $NGINX_IMAGE:$SHA_TAG
