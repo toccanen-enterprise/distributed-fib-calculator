@@ -21,32 +21,6 @@ env:
   NODE_VERSION: '20.x' 
 
 jobs:
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      client_changed: ${{ steps.changes.outputs.client_any_changed }}
-      server_changed: ${{ steps.changes.outputs.server_any_changed }}
-      worker_changed: ${{ steps.changes.outputs.worker_any_changed }}
-      nginx_changed: ${{ steps.changes.outputs.nginx_any_changed }}
-    
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-          
-      - name: Get changed files
-        id: changes
-        uses: tj-actions/changed-files@v44
-        with:
-          files_yaml: |
-            client:
-              - client/**
-            server:
-              - server/**
-            worker:
-              - worker/**
-            nginx:
-              - nginx/**
   client-tests:
     runs-on: ubuntu-latest
     steps:
